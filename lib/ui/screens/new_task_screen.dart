@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:task_manager/ui/screens/add_new_task_screen.dart';
+import 'package:task_manager/ui/utils/app_colors.dart';
+import 'package:task_manager/ui/widgets/task_card.dart';
 import 'package:task_manager/ui/widgets/task_summary_card.dart';
 
 class NewTaskScreen extends StatefulWidget {
@@ -17,6 +19,17 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
       body: Column(
         children: [
           _buildSummarySection(),
+          Expanded(
+            child: ListView.separated(
+              itemCount: 10,
+              itemBuilder: (context, index) {
+                return TaskCard();
+              },
+              separatorBuilder: (context, index) {
+                return const SizedBox(height: 8);
+              },
+            ),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -33,10 +46,22 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            TaskSummaryCard(count: 09, title: 'New', ),
-            TaskSummaryCard(count: 09, title: 'Completed', ),
-            TaskSummaryCard(count: 09, title: 'Progress',),
-            TaskSummaryCard(count: 09, title: 'Cancelled',),
+            TaskSummaryCard(
+              count: 09,
+              title: 'New',
+            ),
+            TaskSummaryCard(
+              count: 09,
+              title: 'Completed',
+            ),
+            TaskSummaryCard(
+              count: 09,
+              title: 'Progress',
+            ),
+            TaskSummaryCard(
+              count: 09,
+              title: 'Cancelled',
+            ),
           ],
         ),
       ),
@@ -52,3 +77,5 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
     );
   }
 }
+
+
