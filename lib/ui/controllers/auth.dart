@@ -11,14 +11,14 @@ class AuthController {
     accessToken = token;
   }
 
-  static Future<String?> getAccessToken(String token) async {
+  static Future<String?> getAccessToken() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String? token = sharedPreferences.getString(_accessTokenKey);
     accessToken = token;
     return token;
   }
 
-  bool isUserLoggedIn() {
+  static bool isUserLoggedIn() {
     return accessToken != null;
   }
 
