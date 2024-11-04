@@ -19,66 +19,76 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
   final TextEditingController _taskDescriptionTEController =
       TextEditingController();
   bool _inProgress = false;
+  bool _shouldRefreshPreviousScreen = false;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const TaskManagerAppBar(),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 12),
-                Text(
-                  'Add New Task',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _taskNameTEController,
-                  validator: (value) {
-                    if (value?.trim().isEmpty ?? true) {
-                      return 'Please enter task name';
-                    }
-                    return null;
-                  },
-                  decoration: const InputDecoration(
-                    hintText: 'Task Name',
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          return;
+        }
+        Navigator.pop(context, _shouldRefreshPreviousScreen);
+      },
+      child: Scaffold(
+        appBar: const TaskManagerAppBar(),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 12),
+                  Text(
+                    'Add New Task',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-                TextFormField(
-                  maxLines: 5,
-                  controller: _taskDescriptionTEController,
-                  validator: (value) {
-                    if (value?.trim().isEmpty ?? true) {
-                      return 'Please enter task description';
-                    }
-                    return null;
-                  },
-                  decoration: const InputDecoration(
-                    hintText: 'Description',
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _taskNameTEController,
+                    validator: (value) {
+                      if (value?.trim().isEmpty ?? true) {
+                        return 'Please enter task name';
+                      }
+                      return null;
+                    },
+                    decoration: const InputDecoration(
+                      hintText: 'Task Name',
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Visibility(
-                  visible: !_inProgress,
-                  replacement: const CenteredCircularProgressIndicator(
-                      currentSemanticsLabel: 'Adding new task'),
-                  child: ElevatedButton(
-                    onPressed: _onTapAddNewTask,
-                    child: const Text('Add New Task'),
+                  const SizedBox(
+                    height: 8,
                   ),
-                ),
-              ],
+                  TextFormField(
+                    maxLines: 5,
+                    controller: _taskDescriptionTEController,
+                    validator: (value) {
+                      if (value?.trim().isEmpty ?? true) {
+                        return 'Please enter task description';
+                      }
+                      return null;
+                    },
+                    decoration: const InputDecoration(
+                      hintText: 'Description',
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Visibility(
+                    visible: !_inProgress,
+                    replacement: const CenteredCircularProgressIndicator(
+                        currentSemanticsLabel: 'Adding new task'),
+                    child: ElevatedButton(
+                      onPressed: _onTapAddNewTask,
+                      child: const Text('Add New Task'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -97,11 +107,10 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
     setState(() {});
 
     Map<String, dynamic> requestBody = {
-      'taskName': _taskNameTEController.text.trim(),
-      'taskDescription': _taskDescriptionTEController.text.trim(),
+      'title': _taskNameTEController.text.trim(),
+      'description': _taskDescriptionTEController.text.trim(),
       'status': 'New'
     };
-
     final NetworkResponse response = await NetworkCaller.postRequest(
       url: Urls.createTaskUrl,
       body: requestBody,
@@ -111,6 +120,7 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
     setState(() {});
 
     if(response.isSuccess){
+      _shouldRefreshPreviousScreen = true;
       _clearFields();
       showSnackBarMessage(context, 'New task added successfully');
     } else {
@@ -121,5 +131,12 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
   void _clearFields() {
     _taskNameTEController.clear();
     _taskDescriptionTEController.clear();
+  }
+
+  @override
+  void dispose() {
+    _taskNameTEController.dispose();
+    _taskDescriptionTEController.dispose();
+    super.dispose();
   }
 }

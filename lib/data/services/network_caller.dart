@@ -10,8 +10,15 @@ class NetworkCaller {
   static Future<NetworkResponse> getRequest({required String url}) async {
     try {
       Uri uri = Uri.parse(url);
+      Map<String, String> curHeaders = {
+        'Content-Type': 'application/json',
+        'token': AuthController.accessToken.toString(),
+      };
       debugPrint('Calling URL: $uri');
-      final Response response = await get(uri);
+      final Response response = await get(
+        uri,
+        headers: curHeaders,
+      );
 
       printResponse(uri.toString(), response);
 
