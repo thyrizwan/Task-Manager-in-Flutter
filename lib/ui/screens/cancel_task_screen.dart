@@ -37,6 +37,7 @@ class _CancelTaskScreenState extends State<CancelTaskScreen> {
           itemBuilder: (context, index) {
             return TaskCard(
               taskModel: _cancelTaskList[index],
+              onRefreshList: _getCancelTaskList,
             );
           },
           separatorBuilder: (context, index) {

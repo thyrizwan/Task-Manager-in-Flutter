@@ -50,22 +50,22 @@ class TaskSummaryCard extends StatelessWidget {
     switch (color) {
       case 'New':
         return (
-          bgColor: Colors.blue.shade200,
+          bgColor: Colors.blue.shade100,
           textColor: Colors.blue.shade900,
         );
       case 'Completed':
         return (
-          bgColor: Colors.green.shade200,
+          bgColor: Colors.green.shade100,
           textColor: Colors.green.shade900,
         );
       case 'Progress':
         return (
-          bgColor: Colors.orange.shade200,
-          textColor: Colors.orange.shade900,
+          bgColor: Colors.yellow.shade100,
+          textColor: Colors.yellow.shade900,
         );
-      case 'Cancelled':
+      case 'Cancel':
         return (
-          bgColor: Colors.red.shade200,
+          bgColor: Colors.red.shade100,
           textColor: Colors.red.shade900,
         );
       default:

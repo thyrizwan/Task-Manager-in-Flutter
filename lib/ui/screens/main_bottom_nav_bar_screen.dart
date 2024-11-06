@@ -40,16 +40,16 @@ class _MainBottomNavBarScreenState extends State<MainBottomNavBarScreen> {
             label: 'New',
           ),
           NavigationDestination(
+            icon: Icon(Icons.access_time_outlined),
+            label: 'Progress',
+          ),
+          NavigationDestination(
             icon: Icon(Icons.check_box),
             label: 'Completed',
           ),
           NavigationDestination(
             icon: Icon(Icons.close),
             label: 'Cancelled',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.access_time_outlined),
-            label: 'Progress',
           ),
         ],
       ),
