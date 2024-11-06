@@ -18,9 +18,9 @@ class _MainBottomNavBarScreenState extends State<MainBottomNavBarScreen> {
 
   final List<Widget> _screens = const [
     NewTaskScreen(),
+    ProgressTaskScreen(),
     CompletedTaskScreen(),
     CancelTaskScreen(),
-    ProgressTaskScreen(),
   ];
 
   @override
