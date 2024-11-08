@@ -61,7 +61,7 @@ class TaskManagerAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                     (predicate) => false);
               },
-              icon: const Icon(Icons.exit_to_app),
+              icon: const Icon(Icons.exit_to_app, color: Colors.white,),
             )
           ],
         ),
