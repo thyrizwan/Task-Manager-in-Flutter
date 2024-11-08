@@ -48,7 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: TaskManagerAppBar(isProfileScreenOpened: true),
+      appBar: const TaskManagerAppBar(isProfileScreenOpened: true),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -88,7 +88,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               width: 60,
               decoration: BoxDecoration(
                 color: Colors.grey.shade400,
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(8),
                   bottomLeft: Radius.circular(8),
                 ),
@@ -114,7 +114,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildUpdateInfoForm() {
     return Visibility(
       visible: !_updateProfileInProgress,
-      replacement: CenteredCircularProgressIndicator(
+      replacement: const CenteredCircularProgressIndicator(
           currentSemanticsLabel: 'Updating Profile'),
       child: Form(
         key: _formKey,

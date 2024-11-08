@@ -41,12 +41,12 @@ class TaskManagerAppBar extends StatelessWidget implements PreferredSizeWidget {
                 children: [
                   Text(
                     AuthController.userData?.fullName ?? 'Not Set',
-                    style: TextStyle(
+                    style: const TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                   Text(
                     AuthController.userData?.email ?? 'Not Set',
-                    style: TextStyle(fontSize: 12, color: Colors.white),
+                    style: const TextStyle(fontSize: 12, color: Colors.white),
                   ),
                 ],
               ),

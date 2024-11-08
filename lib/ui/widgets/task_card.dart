@@ -3,10 +3,8 @@ import 'package:task_manager/data/models/network_response.dart';
 import 'package:task_manager/data/models/task_model.dart';
 import 'package:task_manager/data/services/network_caller.dart';
 import 'package:task_manager/data/utils/urls.dart';
-import 'package:task_manager/ui/utils/app_colors.dart';
 import 'package:task_manager/ui/widgets/centered_circular_progress_indicator.dart';
 import 'package:task_manager/ui/widgets/snack_bar_message.dart';
-import 'package:task_manager/ui/widgets/task_summary_card.dart';
 
 class TaskCard extends StatefulWidget {
   const TaskCard({
@@ -68,11 +66,11 @@ class _TaskCardState extends State<TaskCard> {
                   child: Wrap(
                     children: [
                       IconButton(
-                        icon: Icon(Icons.edit),
+                        icon: const Icon(Icons.edit),
                         onPressed: _onTapEditButton,
                       ),
                       IconButton(
-                        icon: Icon(Icons.delete),
+                        icon: const Icon(Icons.delete),
                         onPressed: _onTapDeleteButton,
                       ),
                     ],
@@ -91,7 +89,7 @@ class _TaskCardState extends State<TaskCard> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Edit Status'),
+          title: const Text('Edit Status'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: ['New', 'Completed', 'Progress', 'Cancel'].map((e) {
@@ -119,7 +117,7 @@ class _TaskCardState extends State<TaskCard> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             // TextButton(
             //   onPressed: () {},
