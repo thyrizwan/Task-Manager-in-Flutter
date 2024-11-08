@@ -53,8 +53,9 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                   itemCount: _newTaskList.length,
                   itemBuilder: (context, index) {
                     return TaskCard(
-                        taskModel: _newTaskList[index],
-                        onRefreshList: _getNewTaskList);
+                      taskModel: _newTaskList[index],
+                      onRefreshList: [_getNewTaskList, _getTaskStatusCount],
+                    );
                   },
                   separatorBuilder: (context, index) {
                     return const SizedBox(height: 8);
@@ -96,10 +97,6 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
     );
   }
 
-  _getTaskSummaryCardList() {
-
-  }
-
   void _onTapAddFloatingActionButton() async {
     final bool? shouldBeRefresh = await Navigator.push(
       context,
@@ -109,6 +106,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
     );
     if (shouldBeRefresh == true) {
       _getNewTaskList();
+      _getTaskStatusCount();
     }
   }
 

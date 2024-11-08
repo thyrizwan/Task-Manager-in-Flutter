@@ -16,7 +16,7 @@ class TaskCard extends StatefulWidget {
   });
 
   final TaskModel taskModel;
-  final VoidCallback onRefreshList;
+  final List<VoidCallback> onRefreshList;
 
   @override
   State<TaskCard> createState() => _TaskCardState();
@@ -158,7 +158,9 @@ class _TaskCardState extends State<TaskCard> {
     );
 
     if (response.isSuccess) {
-      widget.onRefreshList();
+      for (var callback in widget.onRefreshList) {
+        callback();
+      }
     } else {
       showSnackBarMessage(context, response.errorMessage);
     }
@@ -177,7 +179,9 @@ class _TaskCardState extends State<TaskCard> {
     );
 
     if (response.isSuccess) {
-      widget.onRefreshList();
+      for (var callback in widget.onRefreshList) {
+        callback();
+      }
     } else {
       showSnackBarMessage(context, response.errorMessage);
     }

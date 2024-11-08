@@ -40,7 +40,7 @@ class _CompletedTaskScreenState extends State<CompletedTaskScreen> {
             // return Center(child: Text('Task $index'));
             return TaskCard(
               taskModel: _completedTaskList[index],
-              onRefreshList: _getCompletedTaskList,
+              onRefreshList: [_getCompletedTaskList],
             );
           },
           separatorBuilder: (context, index) {

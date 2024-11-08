@@ -202,8 +202,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     Map<String, dynamic> requestBody = {
       'email': _emailTEController.text.trim(),
-      'first_name': _firstNameTEController.text.trim(),
-      'last_name': _lastNameTEController.text.trim(),
+      'firstName': _firstNameTEController.text.trim(),
+      'lastName': _lastNameTEController.text.trim(),
       'mobile': _mobileTEController.text.trim(),
       'password': _passwordTEController.text,
     };

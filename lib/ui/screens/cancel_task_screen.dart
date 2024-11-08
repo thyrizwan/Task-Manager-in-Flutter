@@ -31,13 +31,14 @@ class _CancelTaskScreenState extends State<CancelTaskScreen> {
       onRefresh: () async => _getCancelTaskList,
       child: Visibility(
         visible: !_getCancelTaskListInProgress,
-        replacement: const CenteredCircularProgressIndicator(currentSemanticsLabel: 'Loading cancel tasks...'),
+        replacement: const CenteredCircularProgressIndicator(
+            currentSemanticsLabel: 'Loading cancel tasks...'),
         child: ListView.separated(
           itemCount: _cancelTaskList.length,
           itemBuilder: (context, index) {
             return TaskCard(
               taskModel: _cancelTaskList[index],
-              onRefreshList: _getCancelTaskList,
+              onRefreshList: [_getCancelTaskList],
             );
           },
           separatorBuilder: (context, index) {
@@ -58,7 +59,7 @@ class _CancelTaskScreenState extends State<CancelTaskScreen> {
 
     if (response.isSuccess) {
       final TaskListModel taskListModel =
-      TaskListModel.fromJson(response.responseData);
+          TaskListModel.fromJson(response.responseData);
       _cancelTaskList = taskListModel.data ?? [];
     } else {
       showSnackBarMessage(context, response.errorMessage);

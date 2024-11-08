@@ -10,4 +10,10 @@ class Urls {
   static String deleteTaskUrl({String taskId = ''}) =>
       '$_baseUrl/deleteTask/$taskId';
   static const String fetchTaskStatusCountUrl = '$_baseUrl/taskStatusCount';
+  static const String profileUpdateUrl = '$_baseUrl/profileUpdate';
+  static String checkUserEmailExistUrl({required String email}) =>
+      '$_baseUrl/RecoverVerifyEmail/$email';
+  static String validateOtpUrl({required String email, required int otp}) =>
+      '$_baseUrl/RecoverVerifyOtp/$email/$otp';
+  static const String resetPasswordUrl = '$_baseUrl/RecoverResetPassword';
 }
