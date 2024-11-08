@@ -240,6 +240,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (response.isSuccess) {
       UserModel userModel = UserModel.fromJson(requestBody);
       AuthController.saveUserData(userModel);
+      _passwordTEController.clear();
       showSnackBarMessage(context, 'Profile updated successfully');
     } else {
       showSnackBarMessage(
