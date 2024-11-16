@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:task_manager/data/models/network_response.dart';
-import 'package:task_manager/data/models/task_list_model.dart';
-import 'package:task_manager/data/models/task_model.dart';
-import 'package:task_manager/data/services/network_caller.dart';
-import 'package:task_manager/data/utils/urls.dart';
+import 'package:get/get.dart';
+import 'package:task_manager/ui/controllers/task_list_controller.dart';
 import 'package:task_manager/ui/widgets/centered_circular_progress_indicator.dart';
 import 'package:task_manager/ui/widgets/snack_bar_message.dart';
 import 'package:task_manager/ui/widgets/task_card.dart';
@@ -16,8 +13,8 @@ class ProgressTaskScreen extends StatefulWidget {
 }
 
 class _ProgressTaskScreenState extends State<ProgressTaskScreen> {
-  bool _getProgressTaskListInProgress = false;
-  List<TaskModel> _progressTaskList = [];
+  final TaskListController _progressTaskListController =
+      Get.find<TaskListController>();
 
   @override
   void initState() {
@@ -29,42 +26,41 @@ class _ProgressTaskScreenState extends State<ProgressTaskScreen> {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: () async => _getProgressTaskList,
-      child: Visibility(
-        visible: !_getProgressTaskListInProgress,
-        replacement: const CenteredCircularProgressIndicator(currentSemanticsLabel: 'Loading progress tasks...'),
-        child: ListView.separated(
-          itemCount: _progressTaskList.length,
-          itemBuilder: (context, index) {
-            return TaskCard(
-              taskModel: _progressTaskList[index],
-              onRefreshList: [_getProgressTaskList],
-            );
-          },
-          separatorBuilder: (context, index) {
-            return const SizedBox(height: 8);
-          },
-        ),
+      child: GetBuilder(
+        init: _progressTaskListController,
+        builder: (controller) {
+          return Visibility(
+            visible: !controller.inProgress,
+            replacement: const CenteredCircularProgressIndicator(
+                currentSemanticsLabel: 'Loading progress tasks...'),
+            child: ListView.separated(
+              itemCount: controller.taskList.length,
+              itemBuilder: (context, index) {
+                return TaskCard(
+                  taskModel: controller.taskList[index],
+                  onRefreshList: [_getProgressTaskList],
+                );
+              },
+              separatorBuilder: (context, index) {
+                return const SizedBox(height: 8);
+              },
+            ),
+          );
+        },
       ),
     );
   }
 
   Future<void> _getProgressTaskList() async {
-    _progressTaskList.clear();
-    _getProgressTaskListInProgress = true;
-    setState(() {});
+    final bool result =
+        await _progressTaskListController.getTaskList(status: 'Progress');
 
-    final NetworkResponse response = await NetworkCaller.getRequest(
-        url: '${Urls.fetchTaskByStatusUrl}/Progress');
-
-    if (response.isSuccess) {
-      final TaskListModel taskListModel =
-          TaskListModel.fromJson(response.responseData);
-      _progressTaskList = taskListModel.data ?? [];
-    } else {
-      showSnackBarMessage(context, response.errorMessage);
+    if (result == false) {
+      showSnackBarMessage(
+          context,
+          _progressTaskListController.errorMessage ??
+              'Failed to fetch progress tasks',
+          true);
     }
-
-    _getProgressTaskListInProgress = false;
-    setState(() {});
   }
 }

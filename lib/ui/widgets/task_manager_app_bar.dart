@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:task_manager/ui/controllers/auth.dart';
+import 'package:task_manager/ui/controllers/shared_preference_controller.dart';
 import 'package:task_manager/ui/screens/profile_screen.dart';
 import 'package:task_manager/ui/screens/sign_in_screen.dart';
 import 'package:task_manager/ui/utils/app_colors.dart';
@@ -40,12 +40,12 @@ class TaskManagerAppBar extends StatelessWidget implements PreferredSizeWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    AuthController.userData?.fullName ?? 'Not Set',
+                    SharedPreferenceController.userData?.fullName ?? 'Not Set',
                     style: const TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    AuthController.userData?.email ?? 'Not Set',
+                    SharedPreferenceController.userData?.email ?? 'Not Set',
                     style: const TextStyle(fontSize: 12, color: Colors.white),
                   ),
                 ],
@@ -53,7 +53,7 @@ class TaskManagerAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             IconButton(
               onPressed: () async {
-                await AuthController.removeAccessToken();
+                await SharedPreferenceController.removeAccessToken();
                 Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(

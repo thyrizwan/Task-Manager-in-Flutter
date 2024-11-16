@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:task_manager/app.dart';
 import 'package:task_manager/data/models/network_response.dart';
-import 'package:task_manager/ui/controllers/auth.dart';
+import 'package:task_manager/ui/controllers/shared_preference_controller.dart';
 import 'package:task_manager/ui/screens/sign_in_screen.dart';
 
 class NetworkCaller {
@@ -12,7 +12,7 @@ class NetworkCaller {
       Uri uri = Uri.parse(url);
       Map<String, String> curHeaders = {
         'Content-Type': 'application/json',
-        'token': AuthController.accessToken.toString(),
+        'token': SharedPreferenceController.accessToken.toString(),
       };
       debugPrint('Calling URL: $uri');
       final Response response = await get(
@@ -57,7 +57,7 @@ class NetworkCaller {
       Uri uri = Uri.parse(url);
       Map<String, String> curHeaders = {
         'Content-Type': 'application/json',
-        'token': AuthController.accessToken.toString(),
+        'token': SharedPreferenceController.accessToken.toString(),
       };
       printRequest(uri.toString(), body, curHeaders);
       debugPrint('Calling URL: $uri');
@@ -110,7 +110,7 @@ class NetworkCaller {
   }
 
   static void moveToLogin() async {
-    await AuthController.clearAllData();
+    await SharedPreferenceController.clearAllData();
     Navigator.pushAndRemoveUntil(
         TaskManagerApp.navigatorKey.currentContext!,
         MaterialPageRoute(builder: (context) => const SignInScreen()),

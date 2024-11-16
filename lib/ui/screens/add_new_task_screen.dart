@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:task_manager/data/models/network_response.dart';
 import 'package:task_manager/data/services/network_caller.dart';
 import 'package:task_manager/data/utils/urls.dart';
+import 'package:task_manager/ui/controllers/task_list_controller.dart';
 import 'package:task_manager/ui/widgets/centered_circular_progress_indicator.dart';
 import 'package:task_manager/ui/widgets/snack_bar_message.dart';
 import 'package:task_manager/ui/widgets/task_manager_app_bar.dart';
@@ -18,8 +20,8 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
   final TextEditingController _taskNameTEController = TextEditingController();
   final TextEditingController _taskDescriptionTEController =
       TextEditingController();
-  bool _inProgress = false;
   bool _shouldRefreshPreviousScreen = false;
+  final TaskListController _taskListController = Get.find<TaskListController>();
 
   @override
   Widget build(BuildContext context) {
@@ -78,14 +80,19 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Visibility(
-                    visible: !_inProgress,
-                    replacement: const CenteredCircularProgressIndicator(
-                        currentSemanticsLabel: 'Adding new task'),
-                    child: ElevatedButton(
-                      onPressed: _onTapAddNewTask,
-                      child: const Text('Add New Task'),
-                    ),
+                  GetBuilder(
+                    init: _taskListController,
+                    builder: (controller) {
+                      return Visibility(
+                        visible: !controller.inProgress,
+                        replacement: const CenteredCircularProgressIndicator(
+                            currentSemanticsLabel: 'Adding new task'),
+                        child: ElevatedButton(
+                          onPressed: _onTapAddNewTask,
+                          child: const Text('Add New Task'),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -103,28 +110,18 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
   }
 
   Future<void> _addNewTask() async {
-    _inProgress = true;
-    setState(() {});
-
-    Map<String, dynamic> requestBody = {
-      'title': _taskNameTEController.text.trim(),
-      'description': _taskDescriptionTEController.text.trim(),
-      'status': 'New'
-    };
-    final NetworkResponse response = await NetworkCaller.postRequest(
-      url: Urls.createTaskUrl,
-      body: requestBody,
+    final bool result = await _taskListController.addNewTask(
+      title: _taskNameTEController.text.trim(),
+      description: _taskDescriptionTEController.text.trim(),
     );
 
-    _inProgress = false;
-    setState(() {});
-
-    if(response.isSuccess){
+    if (result) {
       _shouldRefreshPreviousScreen = true;
       _clearFields();
       showSnackBarMessage(context, 'New task added successfully');
     } else {
-      showSnackBarMessage(context, response.errorMessage, true);
+      showSnackBarMessage(
+          context, _taskListController.errorMessage ?? 'Error Occurs', true);
     }
   }
 

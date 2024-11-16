@@ -7,6 +7,8 @@ import 'package:task_manager/ui/utils/app_colors.dart';
 import 'package:task_manager/ui/widgets/task_manager_app_bar.dart';
 
 class MainBottomNavBarScreen extends StatefulWidget {
+  static const String name = '/dashboard';
+
   const MainBottomNavBarScreen({super.key});
 
   @override
@@ -26,7 +28,7 @@ class _MainBottomNavBarScreenState extends State<MainBottomNavBarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: TaskManagerAppBar(),
+      appBar: const TaskManagerAppBar(),
       body: _screens[_selectedIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,

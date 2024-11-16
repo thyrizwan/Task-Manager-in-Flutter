@@ -1,15 +1,15 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:task_manager/data/models/network_response.dart';
-import 'package:task_manager/data/services/network_caller.dart';
-import 'package:task_manager/data/utils/urls.dart';
-import 'package:task_manager/ui/controllers/auth.dart';
+import 'package:get/get.dart';
+import 'package:task_manager/ui/controllers/auth_controller.dart';
 import 'package:task_manager/ui/screens/sign_in_screen.dart';
 import 'package:task_manager/ui/utils/app_colors.dart';
+import 'package:task_manager/ui/widgets/centered_circular_progress_indicator.dart';
 import 'package:task_manager/ui/widgets/screen_background.dart';
 import 'package:task_manager/ui/widgets/snack_bar_message.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
+  static const String name = '/reset-password';
   const ResetPasswordScreen({super.key});
 
   @override
@@ -21,7 +21,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final TextEditingController _passwordTEController = TextEditingController();
   final TextEditingController _confirmPasswordTEController =
       TextEditingController();
-  bool _inProgress = false;
+  final AuthController _authController = Get.find<AuthController>();
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +98,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             obscureText: true,
             controller: _passwordTEController,
             validator: (String? value) {
-              if (value!.isEmpty ?? true) {
+              if (value!.isEmpty) {
                 return 'Please enter your password';
               }
               if (value.length < 6) {
@@ -106,7 +106,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               }
               return null;
             },
-            enabled: !_inProgress,
+            enabled: !_authController.inProgress,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             decoration: const InputDecoration(
               hintText: 'New Password',
@@ -116,7 +116,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           TextFormField(
             controller: _confirmPasswordTEController,
             validator: (String? value) {
-              if (value!.isEmpty ?? true) {
+              if (value!.isEmpty) {
                 return 'Please enter your password';
               }
               if (value.length < 6) {
@@ -127,23 +127,32 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               }
               return null;
             },
-            enabled: !_inProgress,
+            enabled: !_authController.inProgress,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             decoration: const InputDecoration(
               hintText: 'Confirm New Password',
             ),
           ),
           const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: _onTapSendOtpButton,
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.change_circle_rounded),
-                SizedBox(width: 8),
-                Text('Change Password'),
-              ],
-            ),
+          GetBuilder(
+            init: _authController,
+            builder: (controller) {
+              return Visibility(
+                visible: !controller.inProgress,
+                replacement: const CenteredCircularProgressIndicator(currentSemanticsLabel: 'Changing Password'),
+                child: ElevatedButton(
+                  onPressed: _onTapSendOtpButton,
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.change_circle_rounded),
+                      SizedBox(width: 8),
+                      Text('Change Password'),
+                    ],
+                  ),
+                ),
+              );
+            }
           ),
         ],
       ),
@@ -159,23 +168,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   Future<void> _resetPassword() async {
-    _inProgress = true;
-    setState(() {});
+    final bool result = await _authController.resetPassword(
+      _passwordTEController.text.trim(),
+    );
 
-    Map<String, dynamic> requestBody = {
-      'email': AuthController.resetEmail,
-      'password': _passwordTEController.text,
-      'OTP': AuthController.otp,
-    };
-
-    NetworkResponse response = await NetworkCaller.postRequest(
-        url: Urls.resetPasswordUrl, body: requestBody);
-
-    _inProgress = false;
-    setState(() {});
-
-    if (response.isSuccess) {
-      AuthController.clearAllData();
+    if (result) {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
@@ -185,7 +182,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       );
       showSnackBarMessage(context, 'Password changed successfully');
     } else {
-      showSnackBarMessage(context, 'Error: ${response.errorMessage}', true);
+      showSnackBarMessage(
+          context, 'Error: ${_authController.errorMessage}', true);
     }
   }
 }

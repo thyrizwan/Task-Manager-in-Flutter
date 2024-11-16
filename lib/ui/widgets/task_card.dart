@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:task_manager/data/models/network_response.dart';
 import 'package:task_manager/data/models/task_model.dart';
 import 'package:task_manager/data/services/network_caller.dart';
 import 'package:task_manager/data/utils/urls.dart';
+import 'package:task_manager/ui/controllers/task_list_controller.dart';
 import 'package:task_manager/ui/widgets/centered_circular_progress_indicator.dart';
 import 'package:task_manager/ui/widgets/snack_bar_message.dart';
 
@@ -23,8 +25,7 @@ class TaskCard extends StatefulWidget {
 class _TaskCardState extends State<TaskCard> {
   String _selectedStatus = '';
   late final ColorScheme colors;
-  bool _changeStatusInProgress = false;
-  bool _deleteTaskInProgress = false;
+  final TaskListController _taskListController = Get.find<TaskListController>();
 
   @override
   void initState() {
@@ -59,23 +60,27 @@ class _TaskCardState extends State<TaskCard> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 _buildTaskStatusChip(),
-                Visibility(
-                  visible: !_changeStatusInProgress || !_deleteTaskInProgress,
-                  replacement: const CenteredCircularProgressIndicator(
-                      currentSemanticsLabel: ''),
-                  child: Wrap(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: _onTapEditButton,
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: _onTapDeleteButton,
-                      ),
-                    ],
-                  ),
-                )
+                GetBuilder(
+                    init: _taskListController,
+                    builder: (context) {
+                      return Visibility(
+                        visible: !_taskListController.inProgress,
+                        replacement: const CenteredCircularProgressIndicator(
+                            currentSemanticsLabel: ''),
+                        child: Wrap(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: _onTapEditButton,
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: _onTapDeleteButton,
+                            ),
+                          ],
+                        ),
+                      );
+                    })
               ],
             )
           ],
@@ -145,47 +150,31 @@ class _TaskCardState extends State<TaskCard> {
   }
 
   Future<void> _updateTaskStatus(String newStatus) async {
-    _changeStatusInProgress = true;
-    setState(() {});
-
-    final NetworkResponse response = await NetworkCaller.getRequest(
-      url: Urls.updateTaskStatusUrl(
-        taskId: widget.taskModel.sId!,
-        status: newStatus,
-      ),
+    final bool result = await _taskListController.changeTaskStatus(
+      taskId: widget.taskModel.sId!,
+      status: newStatus,
     );
-
-    if (response.isSuccess) {
+    if (result) {
       for (var callback in widget.onRefreshList) {
         callback();
       }
     } else {
-      showSnackBarMessage(context, response.errorMessage);
+      showSnackBarMessage(
+          context, _taskListController.errorMessage ?? 'Error', true);
     }
-    _changeStatusInProgress = false;
-    setState(() {});
   }
 
   Future<void> _onTapDeleteButton() async {
-    _deleteTaskInProgress = true;
-    setState(() {});
-
-    final NetworkResponse response = await NetworkCaller.getRequest(
-      url: Urls.deleteTaskUrl(
-        taskId: widget.taskModel.sId!,
-      ),
-    );
-
-    if (response.isSuccess) {
+    final bool result =
+        await _taskListController.deleteTask(taskId: widget.taskModel.sId!);
+    if (result) {
       for (var callback in widget.onRefreshList) {
         callback();
       }
     } else {
-      showSnackBarMessage(context, response.errorMessage);
+      showSnackBarMessage(
+          context, _taskListController.errorMessage ?? 'Error', true);
     }
-
-    _deleteTaskInProgress = false;
-    setState(() {});
   }
 
   ColorScheme getColorFromString(String color) {

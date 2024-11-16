@@ -1,17 +1,18 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:task_manager/data/models/network_response.dart';
+import 'package:task_manager/data/models/user_info_model.dart';
 import 'package:task_manager/data/models/user_model.dart';
-import 'package:task_manager/data/services/network_caller.dart';
-import 'package:task_manager/data/utils/urls.dart';
-import 'package:task_manager/ui/controllers/auth.dart';
+import 'package:task_manager/ui/controllers/shared_preference_controller.dart';
+import 'package:task_manager/ui/controllers/user_controller.dart';
 import 'package:task_manager/ui/widgets/centered_circular_progress_indicator.dart';
 import 'package:task_manager/ui/widgets/snack_bar_message.dart';
 import 'package:task_manager/ui/widgets/task_manager_app_bar.dart';
 
 class ProfileScreen extends StatefulWidget {
+  static const String name = '/profile';
   const ProfileScreen({super.key});
 
   @override
@@ -27,10 +28,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _mobileNumberTEController =
       TextEditingController();
   final TextEditingController _passwordTEController = TextEditingController();
+  final UserController _userController = Get.find<UserController>();
 
   XFile? _selectedImage;
-
-  bool _updateProfileInProgress = false;
 
   @override
   void initState() {
@@ -39,10 +39,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _setUserData() {
-    _firstNameTEController.text = AuthController.userData?.firstName ?? '';
-    _lastNameTEController.text = AuthController.userData?.lastName ?? '';
-    _emailTEController.text = AuthController.userData?.email ?? '';
-    _mobileNumberTEController.text = AuthController.userData?.mobile ?? '';
+    _firstNameTEController.text = SharedPreferenceController.userData?.firstName ?? '';
+    _lastNameTEController.text = SharedPreferenceController.userData?.lastName ?? '';
+    _emailTEController.text = SharedPreferenceController.userData?.email ?? '';
+    _mobileNumberTEController.text = SharedPreferenceController.userData?.mobile ?? '';
   }
 
   @override
@@ -112,94 +112,99 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildUpdateInfoForm() {
-    return Visibility(
-      visible: !_updateProfileInProgress,
-      replacement: const CenteredCircularProgressIndicator(
-          currentSemanticsLabel: 'Updating Profile'),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            TextFormField(
-              controller: _firstNameTEController,
-              validator: (String? value) {
-                if (value?.trim().isEmpty ?? true) {
-                  return 'Please enter first name';
-                }
-                return null;
-              },
-              decoration: const InputDecoration(
-                hintText: 'First Name',
-              ),
+    return GetBuilder(
+      init: _userController,
+      builder: (controller) {
+        return Visibility(
+          visible: !controller.inProgress,
+          replacement: const CenteredCircularProgressIndicator(
+              currentSemanticsLabel: 'Updating Profile'),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: _firstNameTEController,
+                  validator: (String? value) {
+                    if (value?.trim().isEmpty ?? true) {
+                      return 'Please enter first name';
+                    }
+                    return null;
+                  },
+                  decoration: const InputDecoration(
+                    hintText: 'First Name',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _lastNameTEController,
+                  validator: (String? value) {
+                    if (value?.trim().isEmpty ?? true) {
+                      return 'Please enter last name';
+                    }
+                    return null;
+                  },
+                  decoration: const InputDecoration(
+                    hintText: 'Last Name',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  enabled: false,
+                  controller: _emailTEController,
+                  validator: (String? value) {
+                    if (value?.trim().isEmpty ?? true) {
+                      return 'Please enter email';
+                    }
+                    return null;
+                  },
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                    hintText: 'Email',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _mobileNumberTEController,
+                  validator: (String? value) {
+                    if (value?.trim().isEmpty ?? true) {
+                      return 'Please enter mobile number';
+                    }
+                    if (value!.length < 10) {
+                      return 'Mobile number must be at least 10 digits';
+                    }
+                    return null;
+                  },
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                    hintText: 'Mobile Number',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _passwordTEController,
+                  keyboardType: TextInputType.visiblePassword,
+                  decoration: const InputDecoration(
+                    hintText: 'Password',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _onTapUpdateInfoButton,
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.update),
+                      SizedBox(width: 8),
+                      Text('Update Information'),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _lastNameTEController,
-              validator: (String? value) {
-                if (value?.trim().isEmpty ?? true) {
-                  return 'Please enter last name';
-                }
-                return null;
-              },
-              decoration: const InputDecoration(
-                hintText: 'Last Name',
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              enabled: false,
-              controller: _emailTEController,
-              validator: (String? value) {
-                if (value?.trim().isEmpty ?? true) {
-                  return 'Please enter email';
-                }
-                return null;
-              },
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                hintText: 'Email',
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _mobileNumberTEController,
-              validator: (String? value) {
-                if (value?.trim().isEmpty ?? true) {
-                  return 'Please enter mobile number';
-                }
-                if (value!.length < 10) {
-                  return 'Mobile number must be at least 10 digits';
-                }
-                return null;
-              },
-              keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                hintText: 'Mobile Number',
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _passwordTEController,
-              keyboardType: TextInputType.visiblePassword,
-              decoration: const InputDecoration(
-                hintText: 'Password',
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _onTapUpdateInfoButton,
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.update),
-                  SizedBox(width: 8),
-                  Text('Update Information'),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      }
     );
   }
 
@@ -211,40 +216,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _updateProfile() async {
-    _updateProfileInProgress = true;
-    setState(() {});
+    String? image;
+    if (_selectedImage != null) {
+      List<int> imageBytes = await _selectedImage!.readAsBytes();
+      String base64Image = base64Encode(imageBytes);
+      image = base64Image;
+    }
+    final bool result = await _userController.updateUserInformation(
+      firstName: _firstNameTEController.text.trim(),
+      lastName: _lastNameTEController.text.trim(),
+      email: _emailTEController.text.trim(),
+      mobile: _mobileNumberTEController.text,
+      password: _passwordTEController.text.trim(),
+      photo: image,
+    );
 
-    Map<String, dynamic> requestBody = {
+    Map<String, dynamic> anotherRequestBody = {
       'firstName': _firstNameTEController.text.trim(),
       'lastName': _lastNameTEController.text.trim(),
       'email': _emailTEController.text.trim(),
       'mobile': _mobileNumberTEController.text,
     };
-    if (_passwordTEController.text.isNotEmpty) {
-      requestBody['password'] = _passwordTEController.text;
-    }
-    if (_selectedImage != null) {
-      List<int> imageBytes = await _selectedImage!.readAsBytes();
-      String base64Image = base64Encode(imageBytes);
-      requestBody['photo'] = base64Image;
-    }
 
-    final NetworkResponse response = await NetworkCaller.postRequest(
-      url: Urls.profileUpdateUrl,
-      body: requestBody,
-    );
-
-    _updateProfileInProgress = false;
-    setState(() {});
-
-    if (response.isSuccess) {
-      UserModel userModel = UserModel.fromJson(requestBody);
-      AuthController.saveUserData(userModel);
+    if (result) {
+      UserModel userModel = UserModel.fromJson(anotherRequestBody);
+      SharedPreferenceController.saveUserData(userModel);
       _passwordTEController.clear();
       showSnackBarMessage(context, 'Profile updated successfully');
     } else {
       showSnackBarMessage(
-          context, 'Error Occurs: ${response.errorMessage}', true);
+          context, 'Error Occurs: ${_userController.errorMessage}', true);
     }
   }
 

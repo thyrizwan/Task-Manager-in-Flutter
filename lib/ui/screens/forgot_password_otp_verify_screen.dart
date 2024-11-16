@@ -1,17 +1,22 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:task_manager/data/models/network_response.dart';
 import 'package:task_manager/data/services/network_caller.dart';
 import 'package:task_manager/data/utils/urls.dart';
-import 'package:task_manager/ui/controllers/auth.dart';
+import 'package:task_manager/ui/controllers/auth_controller.dart';
+import 'package:task_manager/ui/controllers/shared_preference_controller.dart';
 import 'package:task_manager/ui/screens/reset_password_screen.dart';
 import 'package:task_manager/ui/screens/sign_in_screen.dart';
 import 'package:task_manager/ui/utils/app_colors.dart';
+import 'package:task_manager/ui/widgets/centered_circular_progress_indicator.dart';
 import 'package:task_manager/ui/widgets/screen_background.dart';
 import 'package:task_manager/ui/widgets/snack_bar_message.dart';
 
 class ForgotPasswordOtpVerifyScreen extends StatefulWidget {
+  static const String name = '/forgot-password-otp-verify';
+
   const ForgotPasswordOtpVerifyScreen({super.key});
 
   @override
@@ -23,7 +28,7 @@ class _ForgotPasswordOtpVerifyScreenState
     extends State<ForgotPasswordOtpVerifyScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _otpTEController = TextEditingController();
-  bool _inProgress = false;
+  final AuthController _authController = Get.find<AuthController>();
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +111,7 @@ class _ForgotPasswordOtpVerifyScreenState
             obscureText: false,
             controller: _otpTEController,
             validator: (String? value) {
-              if (value!.isEmpty ?? true) {
+              if (value!.isEmpty) {
                 return 'Please enter OTP';
               }
               return null;
@@ -128,16 +133,27 @@ class _ForgotPasswordOtpVerifyScreenState
             appContext: context,
           ),
           const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _onTapVerifyOtpButton,
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.check),
-                SizedBox(width: 8),
-                Text('Verify OTP'),
-              ],
-            ),
+          GetBuilder(
+            init: _authController,
+            builder: (controller) {
+              return Visibility(
+                visible: !controller.inProgress,
+                replacement: const CenteredCircularProgressIndicator(
+                  currentSemanticsLabel: 'Verifying OTP',
+                ),
+                child: ElevatedButton(
+                  onPressed: _onTapVerifyOtpButton,
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.check),
+                      SizedBox(width: 8),
+                      Text('Verify OTP'),
+                    ],
+                  ),
+                ),
+              );
+            }
           ),
         ],
       ),
@@ -153,17 +169,9 @@ class _ForgotPasswordOtpVerifyScreenState
   }
 
   Future<void> _verifyOtp() async {
-    _inProgress = true;
-    setState(() {});
-
-    String tempOtp = _otpTEController.text.trim();
-    String tempEmail = AuthController.resetEmail.toString();
-
-    NetworkResponse response = await NetworkCaller.getRequest(
-        url: Urls.validateOtpUrl(email: tempEmail, otp: int.parse(tempOtp)));
-
-    if (response.isSuccess) {
-      AuthController.saveOtp(tempOtp);
+    final bool result =
+        await _authController.validateOtp(_otpTEController.text);
+    if (result) {
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -172,10 +180,8 @@ class _ForgotPasswordOtpVerifyScreenState
       );
       showSnackBarMessage(context, 'OTP verified successfully');
     } else {
-      showSnackBarMessage(context, 'Error: ${response.errorMessage}', true);
+      showSnackBarMessage(
+          context, 'Error: ${_authController.errorMessage}', true);
     }
-
-    _inProgress = false;
-    setState(() {});
   }
 }
