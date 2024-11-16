@@ -18,7 +18,7 @@ class TaskListController extends GetxController {
 
 
   /// This method is added to get the list of tasks with status
-  ///
+  /// @param status: the status of the task
   /// @return Future<bool> returns true if the task list is fetched successfully, otherwise false
   Future<bool> getTaskList({required String status}) async {
     _inProgress = true;
